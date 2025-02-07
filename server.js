@@ -89,22 +89,34 @@ fastify.post("/", function (request, reply) {
   reply.send({ body });
 });
 
-// Gemini AI를 호출하는 엔드포인트
+// ✅ `/1` 엔드포인트 수정 (제대로 등록되었는지 확인)
 fastify.post("/1", async function (request, reply) {
-  const { body } = request;
-  const { text } = body;
-
-  // AI 응답을 받아서 반환
-  reply.send({ reply: await makeReply(text) });
+  try {
+    const { text } = request.body;
+    if (!text) {
+      return reply.status(400).send({ error: "text 값이 필요합니다." });
+    }
+    const aiReply = await makeReply(text);
+    reply.send({ reply: aiReply });
+  } catch (error) {
+    console.error("/1 엔드포인트 오류:", error);
+    reply.status(500).send({ error: "서버 오류 발생" });
+  }
 });
 
-// Groq AI를 호출하는 엔드포인트
+// ✅ `/2` 엔드포인트 수정
 fastify.post("/2", async function (request, reply) {
-  const { body } = request;
-  const { text } = body;
-
-  // AI 응답을 받아서 반환
-  reply.send({ reply: await makeReply2(text) });
+  try {
+    const { text } = request.body;
+    if (!text) {
+      return reply.status(400).send({ error: "text 값이 필요합니다." });
+    }
+    const aiReply = await makeReply2(text);
+    reply.send({ reply: aiReply });
+  } catch (error) {
+    console.error("/2 엔드포인트 오류:", error);
+    reply.status(500).send({ error: "서버 오류 발생" });
+  }
 });
 
 // 서버 실행 (PORT 환경 변수에 설정된 포트에서 실행)
