@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌿 나를 위한 힐링 푸드 추천 🍵</title>
+
+    <!-- ✅ Google Fonts 추가 -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gaegu&family=Gowun+Dodum&family=Pretendard&family=Playfair+Display&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- ✅ Bootstrap 추가 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+      /* ✅ 배경 스타일 */
+      body {
+        font-family: "Do Hyeon", sans-serif;
+        background: linear-gradient(135deg, #f7f4e3, #d4a373);
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        min-height: 100vh;
+        padding-top: 120px;
+      }
+
+      /* ✅ 헤더 스타일 */
+      header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #5a352a;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+        border-radius: 0 0 20px 20px;
+      }
+
+      /* ✅ 카드형 결과 스타일 */
+      .result {
+        background: #fff8e1;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+        margin-top: 20px;
+        text-align: center;
+        font-size: 18px;
+        animation: fadeIn 0.5s ease-in-out;
+        transition: transform 0.3s ease-in-out;
+      }
+      .result:hover {
+        transform: scale(1.05);
+      }
+
+      /* ✅ 버튼 스타일 */
+      button {
+        background: #6c946b;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 8px;
+        width: 100%;
+        transition: all 0.3s ease-in-out;
+      }
+      button:hover {
+        background: #3e603e;
+      }
+
+      /* ✅ 애니메이션 효과 */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ✅ 아이콘 스타일 */
+      .icon {
+        font-size: 24px;
+        margin-right: 10px;
+        color: #6c946b;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ✅ 헤더 -->
+    <header>🌿 나를 위한 힐링 푸드 추천 🍵</header>
+
+    <!-- ✅ 폼 -->
+    <form id="controller" class="mt-4 p-4 bg-light rounded shadow">
+      <label>
+        <i class="fas fa-seedling icon"></i> 힐링 푸드 추천 모델:
+        <select name="modelOption" class="form-select">
+          <option value="1">🌸 Gemini 1.5</option>
+          <option value="2">🍵 Gemini 2.0</option>
+        </select>
+      </label>
+      <textarea
+        name="textData"
+        class="form-control mt-3"
+        placeholder="당신의 기분을 입력하세요!"
+      ></textarea>
+      <button id="submitButton" class="mt-3">✨ 추천 받기 ✨</button>
+      <button id="resetButton" class="mt-2 btn btn-danger">
+        🗑️ 데이터 초기화
+      </button>
+    </form>
+
+    <!-- ✅ 결과 출력 부분 -->
+    <div
+      id="container"
+      class="mt-4 w-100 d-flex flex-column align-items-center"
+    ></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const container = document.querySelector("#container");
+        const form = document.querySelector("#controller");
+        const resetButton = document.querySelector("#resetButton");
+
+        // ✅ 로컬 스토리지에서 데이터 불러오기
+        let data = JSON.parse(localStorage.getItem("myData")) || [];
+
+        function updateContainer() {
+          container.innerHTML = ""; 
+
+          if (data.length === 0) {
+            localStorage.removeItem("myData"); 
+            return;
+          }
+
+          data.forEach((d, index) => {
+            const resultDiv = document.createElement("div");
+            resultDiv.className = "result";
+            resultDiv.innerHTML = `<i class="fas fa-heart icon"></i> <strong>${d.text}</strong> → ${d.reply}`;
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "삭제";
+            deleteButton.className = "btn btn-warning mt-2";
+            deleteButton.addEventListener("click", () => {
+              data.splice(index, 1);
+              updateContainer();
+            });
+
+            resultDiv.appendChild(deleteButton);
+            container.appendChild(resultDiv);
+          });
+
+          if (data.length > 0) {
+            localStorage.setItem("myData", JSON.stringify(data));
+          }
+        }
+
+        async function handleForm(event) {
+          event.preventDefault();
+          const formData = new FormData(form);
+          const text = formData.get("textData");
+          const model = formData.get("modelOption");
+
+          let reply = "추천을 받지 못했어요. 😢"; 
+
+          if (model === "1") {
+            reply = `👬 Gemini 1.5 : ${await fetchAIReply(text, "1")}`;
+          } else if (model === "2") {
+            reply = `👀 Gemini 2.0 : ${await fetchAIReply(text, "2")}`;
+          }
+
+          data.push({ text, reply });
+          localStorage.setItem("myData", JSON.stringify(data));
+          updateContainer();
+        }
+
+        async function fetchAIReply(text, model) {
+          const response = await fetch("https://your-glitch-project.glitch.me/" + model, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+
+          const json = await response.json();
+          return json.reply || "추천을 받지 못했어요. 😢";
+        }
+
+        form.addEventListener("submit", handleForm);
+
+        resetButton.addEventListener("click", () => {
+          data.length = 0;
+          localStorage.removeItem("myData");
+          updateContainer();
+        });
+
+        updateContainer();
+      });
+    </script>
+  </body>
+</html>
