@@ -29,7 +29,7 @@ async function makeReply(text) {
 
   try {
     const response = await axios.post(url, {
-      contents: [{ parts: [{ text: `${text} 기분일 때 추천할 특별한 음식과 이유는? 100자 이내의 평문으로 작성해줘.` }] }],
+      contents: [{ parts: [{ text: `${text} 기분일 때 추천할 특별한 음식과 추천해준 이유는? 300자 이내의 평문으로 작성해줘.` }] }],
     });
 
     return response.data.candidates?.[0]?.content?.parts?.[0]?.text || "추천을 받지 못했어요. 😢";
@@ -46,7 +46,7 @@ async function makeReply2(text) {
 
   try {
     const response = await axios.post(url, {
-      contents: [{ parts: [{ text: `${text} 기분일 때 추천할 특별한 음식과 이유는? 100자 이내의 평문으로 작성해줘.` }] }],
+      contents: [{ parts: [{ text: `${text} 기분일 때 추천할 특별한 음식과 추천해준 이유는? 300자 이내의 평문으로 작성해줘.` }] }],
     });
 
     return response.data.candidates?.[0]?.content?.parts?.[0]?.text || "추천을 받지 못했어요. 😢";
